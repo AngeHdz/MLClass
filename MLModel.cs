@@ -5,14 +5,18 @@ namespace MLClass
     public class MLModel
     {
         public MLContext mlContext = new MLContext();
+        public string PathTraining = string.Empty;
+        public string PathModel = string.Empty;
 
         public void Training()
         {
             Task.Run(() => {
 
-                IDataView Dta = TellTaleModel.LoadImageFromFolder(mlContext, "C:\\Image\\Training\\");
+                //IDataView Dta = TellTaleModel.LoadImageFromFolder(mlContext, "C:\\Image\\Training\\");
+                IDataView Dta = TellTaleModel.LoadImageFromFolder(mlContext, PathTraining);
                 ITransformer d = TellTaleModel.RetrainModel(mlContext, Dta);
-                mlContext.Model.Save(d, Dta.Schema, "C:\\Image\\Model\\TellTaleModel.mlnet");
+                //mlContext.Model.Save(d, Dta.Schema, "C:\\Image\\Model\\TellTaleModel.mlnet");
+                mlContext.Model.Save(d, Dta.Schema, PathModel);
 
                 return Task.CompletedTask;
             });
