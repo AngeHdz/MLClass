@@ -9,6 +9,13 @@ namespace MLClass
 {
     public partial class TellTaleModel
     {
+
+        //public TellTaleModel() { }
+
+        //public TellTaleModel(string mLNetModelPath) 
+        //{
+        //    MLNetModelPath = mLNetModelPath;
+        //}
         /// <summary>
         /// model input class for TellTaleModel.
         /// </summary>
@@ -22,7 +29,6 @@ namespace MLClass
             [LoadColumn(1)]
             [ColumnName(@"ImageSource")]
             public byte[] ImageSource { get; set; }
-
         }
 
         #endregion
@@ -49,6 +55,7 @@ namespace MLClass
 
         #endregion
 
+
         //private static string MLNetModelPath = Path.GetFullPath("TellTaleModel.mlnet");
         private static string MLNetModelPath = @"C:\Image\Model\TellTaleModel.mlnet";
 
@@ -67,8 +74,9 @@ namespace MLClass
         /// </summary>
         /// <param name="input">model input.</param>
         /// <returns><seealso cref=" ModelOutput"/></returns>
-        public static IOrderedEnumerable<KeyValuePair<string, float>> PredictAllLabels(ModelInput input)
+        public static IOrderedEnumerable<KeyValuePair<string, float>> PredictAllLabels(ModelInput input, string PathModel)
         {
+            if(!string.IsNullOrEmpty(PathModel)) MLNetModelPath = PathModel;
             var predEngine = PredictEngine.Value;
             var result = predEngine.Predict(input);
             return GetSortedScoresWithLabels(result);
