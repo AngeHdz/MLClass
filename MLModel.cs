@@ -8,6 +8,8 @@ namespace MLClass
         public string PathTraining = string.Empty;
         public string PathModel = string.Empty;
 
+        public List<string> Categories = new List<string>();
+
         public MLModel() { }
         
 
@@ -25,8 +27,9 @@ namespace MLClass
             });
         }
 
-        public void Test(byte[] imageBytes, ref string Key,ref float Accuracy, string PathModel = "") 
+        public void Test(byte[] imageBytes, ref string Key,ref float Accuracy, string PathModel = "")
         {
+            Categories.Clear();
             TellTaleModel.ModelInput sampleData = new TellTaleModel.ModelInput()
             {
                 ImageSource = imageBytes,
@@ -34,7 +37,7 @@ namespace MLClass
 
             // Make a single prediction on the sample data and print results.
             IOrderedEnumerable<KeyValuePair<string, float>> sortedScoresWithLabel = TellTaleModel.PredictAllLabels(sampleData, PathModel);
-
+            Categories = sortedScoresWithLabel.Select(x => x.Key).ToList();
             KeyValuePair<string, float> d = sortedScoresWithLabel.OrderByDescending(x => x.Value).First();
             Key = d.Key;
             Accuracy = d.Value;
@@ -42,6 +45,7 @@ namespace MLClass
 
         public void Test(byte[] imageBytes, ref string Key, ref float Accuracy,ref List<string> log,string PathModel = "")
         {
+            Categories.Clear();
             TellTaleModel.ModelInput sampleData = new TellTaleModel.ModelInput()
             {
                 ImageSource = imageBytes,
@@ -49,6 +53,7 @@ namespace MLClass
 
             // Make a single prediction on the sample data and print results.
             IOrderedEnumerable<KeyValuePair<string, float>> sortedScoresWithLabel = TellTaleModel.PredictAllLabels(sampleData, PathModel);
+            Categories = sortedScoresWithLabel.Select(x => x.Key).ToList();
             foreach (var data in sortedScoresWithLabel) 
             {
                 log.Add($"{data.Key}: {data.Value}");
