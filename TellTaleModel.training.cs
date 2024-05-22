@@ -57,7 +57,6 @@ namespace MLClass
         {
             var pipeline = BuildPipeline(mlContext);
             var model = pipeline.Fit(trainData);
-
             return model;
         }
 
