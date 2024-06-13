@@ -14,7 +14,6 @@ namespace MLClass
     public partial class TellTaleModel
     {
 
-
         /// <summary>
         ///  Load an IDataView from a folder path.
         /// </summary>
@@ -53,10 +52,19 @@ namespace MLClass
         /// <param name="mlContext"></param>
         /// <param name="trainData"></param>
         /// <returns></returns>
-        public static ITransformer RetrainModel(MLContext mlContext, IDataView trainData)
+        public static ITransformer RetrainModel(MLContext mlContext, IDataView trainData, ImageClassificationTrainer.Options options,out MulticlassClassificationMetrics metrics)
         {
-            var pipeline = BuildPipeline(mlContext);
+            var pipeline = BuildPipeline(mlContext, options);
+            var trainTestData = mlContext.Data.TrainTestSplit(trainData, testFraction: 0.2);
+            var trainData1 = trainTestData.TrainSet;
+            var testData = trainTestData.TestSet;
             var model = pipeline.Fit(trainData);
+            var predictions = model.Transform(trainData);
+
+            metrics = mlContext.MulticlassClassification.Evaluate(predictions, "Label", "Score", "PredictedLabel");
+            
+            LogReportClass.CreateLogConfusionMatrix(AppContext.BaseDirectory, metrics.ConfusionMatrix.GetFormattedConfusionTable());
+
             return model;
         }
 
@@ -65,11 +73,14 @@ namespace MLClass
         /// </summary>
         /// <param name="mlContext"></param>
         /// <returns></returns>
-        public static IEstimator<ITransformer> BuildPipeline(MLContext mlContext)
+        public static IEstimator<ITransformer> BuildPipeline(MLContext mlContext, ImageClassificationTrainer.Options options)
         {
+            
+
             // Data process configuration with pipeline data transformations
             var pipeline = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName:@"Label",inputColumnName:@"Label",addKeyValueAnnotationsAsText:false)      
-                                    .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(labelColumnName:@"Label",scoreColumnName:@"Score",featureColumnName:@"ImageSource"))
+                                    //.Append(mlContext.MulticlassClassification.Trainers.ImageClassification(labelColumnName:@"Label",scoreColumnName:@"Score",featureColumnName:@"ImageSource"))
+                                    .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(options))
                                     .Append(mlContext.Transforms.Conversion.MapKeyToValue(outputColumnName:@"PredictedLabel",inputColumnName:@"PredictedLabel"));
 
             return pipeline;
